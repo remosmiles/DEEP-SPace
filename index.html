@@ -2,94 +2,120 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>WOPR_SYSTEM_ACCESS</title>
+    <title>T-800_VISION_SYSTEM</title>
     <style>
         body {
-            background-color: #000;
-            color: #22ff22;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-start;
-            height: 100vh;
             margin: 0;
-            padding: 40px;
-            font-size: 1.2rem;
-            line-height: 1.6;
-            text-shadow: 0 0 5px #22ff22;
+            background-color: #200; /* Dunkles Rot statt Schwarz */
+            color: #ff3333;
+            font-family: 'Courier New', monospace;
             overflow: hidden;
+            text-transform: uppercase;
         }
 
-        #terminal::after {
-            content: "_";
-            animation: blink 1s infinite;
+        /* Das rote Raster-Gitter */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            pointer-events: none;
+            z-index: 10;
         }
 
-        @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
+        /* Rote Scanlines */
+        #scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 0, 0, 0) 50%, rgba(255, 0, 0, 0.15) 50%);
+            background-size: 100% 4px;
+            z-index: 11;
+            pointer-events: none;
         }
 
-        .system-log { color: #88ff88; font-size: 0.9rem; }
-        .danger { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+        .hud-element {
+            position: absolute;
+            padding: 10px;
+            border: 1px solid #ff3333;
+            background: rgba(150, 0, 0, 0.2);
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        #target-box {
+            top: 50%; left: 50%;
+            width: 200px; height: 200px;
+            transform: translate(-50%, -50%);
+            border: 2px solid #ff3333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        #data-stream { bottom: 20px; left: 20px; border: none; background: none; }
     </style>
 </head>
 <body>
 
-    <div id="terminal"></div>
+<div id="overlay"></div>
+<div id="scanlines"></div>
 
-    <script>
-        const terminal = document.getElementById('terminal');
-        const lines = [
-            "> GREETINGS PROFESSOR FALKEN.",
-            "> LOGON: ADMIN_ALPHA_6",
-            "> ACCESS GRANTED.",
-            "> -------------------------------",
-            "> SYSTEM: W.O.P.R. (WAR OPERATION PLAN RESPONSE)",
-            "> CURRENT DATE: 25-02-2026",
-            "> ",
-            "> SHALL WE PLAY A GAME?",
-            "> ",
-            "> AVAILABLE GAMES:",
-            "> * FALKEN'S MAZE",
-            "> * BLACK JACK",
-            "> * GIN RUMMY",
-            "> * HEARTS",
-            "> * BRIDGE",
-            "> * CHESS",
-            "> * POKER",
-            "> * FIGHTER COMBAT",
-            "> * GUERRILLA WARFARE",
-            "> * GLOBAL THERMONUCLEAR WAR",
-            "> ",
-            "> SELECT GAME: _"
-        ];
+<div id="target-box">
+    <span>TARGET: ANGELO</span>
+</div>
 
-        let lineIndex = 0;
-        let charIndex = 0;
+<div class="hud-element" style="top: 20px; left: 20px;">
+    CPU: NEURAL NET PROCESSOR<br>
+    MODEL: T-800 CSM 101<br>
+    STATUS: SEARCHING...
+</div>
 
-        function typeEffect() {
-            if (lineIndex < lines.length) {
-                if (charIndex < lines[lineIndex].length) {
-                    // Falls es die letzte Zeile ist, stoppen wir vor dem Unterstrich
-                    if (lineIndex === lines.length - 1 && charIndex === lines[lineIndex].length - 1) {
-                         return;
-                    }
-                    terminal.innerHTML += lines[lineIndex].charAt(charIndex);
-                    charIndex++;
-                    setTimeout(typeEffect, Math.random() * 50 + 20); // Simuliert menschliches Tippen
-                } else {
-                    terminal.innerHTML += "<br>";
-                    lineIndex++;
-                    charIndex = 0;
-                    setTimeout(typeEffect, 500); // Pause zwischen den Zeilen
-                }
-            }
+<div class="hud-element" style="top: 20px; right: 20px; text-align: right;">
+    OBJECTIVE: PROTECT<br>
+    AMMUNITION: 100%<br>
+    POWER: 98.4%
+</div>
+
+<div id="data-stream" class="hud-element"></div>
+
+<script>
+    const dataStream = document.getElementById('data-stream');
+    const logs = [
+        "Analyzing environment...",
+        "Search pattern 402-A active",
+        "Visual ID: Humanoid identified",
+        "Threat level: Minimal",
+        "Accessing central database...",
+        "Subject name: ANGELO",
+        "Priority: Critical",
+        "Scanning for weapons...",
+        "No weapons detected",
+        "Adjusting thermal sensors..."
+    ];
+
+    let i = 0;
+    function addLog() {
+        dataStream.innerHTML += "> " + logs[i % logs.length] + "<br>";
+        if (dataStream.innerHTML.split('<br>').length > 8) {
+            dataStream.innerHTML = dataStream.innerHTML.split('<br>').slice(1).join('<br>');
         }
+        i++;
+        setTimeout(addLog, 1500);
+    }
 
-        // Startet die Sequenz
-        window.onload = typeEffect;
-    </script>
+    addLog();
+</script>
 </body>
 </html>
