@@ -2,120 +2,122 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>T-800_VISION_SYSTEM</title>
+    <title>INTERACTIVE_HACK_MODE</title>
     <style>
         body {
-            margin: 0;
-            background-color: #200; /* Dunkles Rot statt Schwarz */
-            color: #ff3333;
+            background-color: #000;
+            color: #0f0;
             font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
             overflow: hidden;
-            text-transform: uppercase;
         }
 
-        /* Das rote Raster-Gitter */
-        #overlay {
+        #terminal {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Das "Zugriff erlaubt" Fenster */
+        #access-msg {
+            display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
-            background-size: 30px 30px;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        /* Rote Scanlines */
-        #scanlines {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(255, 0, 0, 0) 50%, rgba(255, 0, 0, 0.15) 50%);
-            background-size: 100% 4px;
-            z-index: 11;
-            pointer-events: none;
-        }
-
-        .hud-element {
-            position: absolute;
-            padding: 10px;
-            border: 1px solid #ff3333;
-            background: rgba(150, 0, 0, 0.2);
-            font-size: 14px;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
-        }
-
-        #target-box {
-            top: 50%; left: 50%;
-            width: 200px; height: 200px;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            border: 2px solid #ff3333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: pulse 1s infinite;
+            background: #000;
+            border: 5px solid #0f0;
+            color: #0f0;
+            padding: 50px;
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 0 30px #0f0;
+            z-index: 100;
+            animation: pulse 0.5s infinite;
         }
 
         @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.05); }
-            100% { transform: translate(-50%, -50%) scale(1); }
+            0% { box-shadow: 0 0 10px #0f0; }
+            50% { box-shadow: 0 0 50px #0f0; }
+            100% { box-shadow: 0 0 10px #0f0; }
         }
 
-        #data-stream { bottom: 20px; left: 20px; border: none; background: none; }
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: #0f0;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
     </style>
 </head>
-<body>
+<body onclick="focusTerminal()">
 
-<div id="overlay"></div>
-<div id="scanlines"></div>
+    <div id="terminal"></div>
+    <span class="cursor"></span>
 
-<div id="target-box">
-    <span>TARGET: ANGELO</span>
-</div>
+    <div id="access-msg">
+        ACCESS GRANTED<br>
+        <span style="font-size: 1rem;">WELCOME, ANGELO</span>
+    </div>
 
-<div class="hud-element" style="top: 20px; left: 20px;">
-    CPU: NEURAL NET PROCESSOR<br>
-    MODEL: T-800 CSM 101<br>
-    STATUS: SEARCHING...
-</div>
+    <script>
+        const terminal = document.getElementById('terminal');
+        const accessMsg = document.getElementById('access-msg');
+        
+        // Ein riesiger String aus "Hacker-Code", der Stück für Stück erscheint
+        const fakeCode = `
+import socket
+import threading
 
-<div class="hud-element" style="top: 20px; right: 20px; text-align: right;">
-    OBJECTIVE: PROTECT<br>
-    AMMUNITION: 100%<br>
-    POWER: 98.4%
-</div>
+target = '192.168.1.1'
+port = 80
+fake_ip = '182.21.20.32'
 
-<div id="data-stream" class="hud-element"></div>
+def attack():
+    while True:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((target, port))
+        s.sendto(("GET /" + target + " HTTP/1.1\\r\\n").encode('ascii'), (target, port))
+        s.sendto(("Host: " + fake_ip + "\\r\\n\\r\\n").encode('ascii'), (target, port))
+        s.close()
 
-<script>
-    const dataStream = document.getElementById('data-stream');
-    const logs = [
-        "Analyzing environment...",
-        "Search pattern 402-A active",
-        "Visual ID: Humanoid identified",
-        "Threat level: Minimal",
-        "Accessing central database...",
-        "Subject name: ANGELO",
-        "Priority: Critical",
-        "Scanning for weapons...",
-        "No weapons detected",
-        "Adjusting thermal sensors..."
-    ];
+# INITIALIZING BYPASS...
+# DECRYPTING RSA 2048-BIT KEY...
+# STACK OVERFLOW AT 0x4421AF
+# OVERRIDING SYSTEM KERNEL...
+# INJECTING SQL MAP...
+# ACCESSING CORE DATABASE...
+        `.repeat(20); // Wir wiederholen es, damit der Code nicht ausgeht
 
-    let i = 0;
-    function addLog() {
-        dataStream.innerHTML += "> " + logs[i % logs.length] + "<br>";
-        if (dataStream.innerHTML.split('<br>').length > 8) {
-            dataStream.innerHTML = dataStream.innerHTML.split('<br>').slice(1).join('<br>');
+        let index = 0;
+
+        // Wenn man eine Taste drückt
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Enter") {
+                // Bei Enter kommt die Meldung
+                accessMsg.style.display = "block";
+                setTimeout(() => { accessMsg.style.display = "none"; }, 3000);
+            } else {
+                // Bei jeder anderen Taste erscheinen 3 Zeichen des Fake-Codes
+                const slice = fakeCode.slice(index, index + 3);
+                terminal.innerText += slice;
+                index += 3;
+
+                // Automatisch nach unten scrollen
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        });
+
+        function focusTerminal() {
+            // Hilft auf Mobilgeräten
+            alert("Tippe auf deiner Tastatur, um den Hack zu starten!");
         }
-        i++;
-        setTimeout(addLog, 1500);
-    }
-
-    addLog();
-</script>
+    </script>
 </body>
 </html>
