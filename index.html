@@ -2,92 +2,94 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>TERMINAL_COORDINATES_NULL</title>
+    <title>WOPR_SYSTEM_ACCESS</title>
     <style>
-        body { margin: 0; background: #000; color: #0088ff; font-family: 'Courier New', monospace; overflow: hidden; }
-        canvas { position: absolute; top: 0; left: 0; filter: blur(0.5px); }
-        #ui {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-            pointer-events: none;
-            text-transform: uppercase;
-            font-size: 12px;
-            line-height: 1.5;
-            letter-spacing: 2px;
+        body {
+            background-color: #000;
+            color: #22ff22;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+            padding: 40px;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            text-shadow: 0 0 5px #22ff22;
+            overflow: hidden;
         }
-        .scanline {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px; z-index: 20; pointer-events: none;
+
+        #terminal::after {
+            content: "_";
+            animation: blink 1s infinite;
         }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .system-log { color: #88ff88; font-size: 0.9rem; }
+        .danger { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
     </style>
 </head>
 <body>
-    <div class="scanline"></div>
-    <div id="ui">
-        > SYSTEM_STATUS: ACTIVE<br>
-        > COORD_X: <span id="valX">0</span><br>
-        > COORD_Y: <span id="valY">0</span><br>
-        > TARGET: ANGELO_S_OS
-    </div>
-    <canvas id="canvas"></canvas>
+
+    <div id="terminal"></div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height, lines = [];
+        const terminal = document.getElementById('terminal');
+        const lines = [
+            "> GREETINGS PROFESSOR FALKEN.",
+            "> LOGON: ADMIN_ALPHA_6",
+            "> ACCESS GRANTED.",
+            "> -------------------------------",
+            "> SYSTEM: W.O.P.R. (WAR OPERATION PLAN RESPONSE)",
+            "> CURRENT DATE: 25-02-2026",
+            "> ",
+            "> SHALL WE PLAY A GAME?",
+            "> ",
+            "> AVAILABLE GAMES:",
+            "> * FALKEN'S MAZE",
+            "> * BLACK JACK",
+            "> * GIN RUMMY",
+            "> * HEARTS",
+            "> * BRIDGE",
+            "> * CHESS",
+            "> * POKER",
+            "> * FIGHTER COMBAT",
+            "> * GUERRILLA WARFARE",
+            "> * GLOBAL THERMONUCLEAR WAR",
+            "> ",
+            "> SELECT GAME: _"
+        ];
 
-        function init() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-            lines = [];
-            for(let i = 0; i < 150; i++) {
-                lines.push({
-                    x: Math.random() * width - width / 2,
-                    y: Math.random() * height - height / 2,
-                    z: Math.random() * width,
-                    o: Math.random()
-                });
+        let lineIndex = 0;
+        let charIndex = 0;
+
+        function typeEffect() {
+            if (lineIndex < lines.length) {
+                if (charIndex < lines[lineIndex].length) {
+                    // Falls es die letzte Zeile ist, stoppen wir vor dem Unterstrich
+                    if (lineIndex === lines.length - 1 && charIndex === lines[lineIndex].length - 1) {
+                         return;
+                    }
+                    terminal.innerHTML += lines[lineIndex].charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeEffect, Math.random() * 50 + 20); // Simuliert menschliches Tippen
+                } else {
+                    terminal.innerHTML += "<br>";
+                    lineIndex++;
+                    charIndex = 0;
+                    setTimeout(typeEffect, 500); // Pause zwischen den Zeilen
+                }
             }
         }
 
-        function draw() {
-            ctx.fillStyle = 'rgba(0, 8, 20, 0.2)'; // Tiefes Blau-Schwarz
-            ctx.fillRect(0, 0, width, height);
-            
-            ctx.strokeStyle = 'rgba(0, 136, 255, 0.5)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-
-            lines.forEach(l => {
-                l.z -= 4; // Geschwindigkeit des Tunnels
-                if(l.z <= 0) l.z = width;
-
-                // Projektion von 3D auf 2D
-                let sx = (l.x / l.z) * width + width / 2;
-                let sy = (l.y / l.z) * height + height / 2;
-                let size = (1 - l.z / width) * 2;
-
-                ctx.moveTo(sx, sy);
-                ctx.lineTo(sx + size, sy + size);
-                
-                // UI Werte updaten
-                if(Math.random() > 0.99) {
-                    document.getElementById('valX').innerText = Math.floor(sx);
-                    document.getElementById('valY').innerText = Math.floor(sy);
-                }
-            });
-            ctx.stroke();
-            requestAnimationFrame(draw);
-        }
-
-        window.addEventListener('resize', init);
-        init();
-        draw();
+        // Startet die Sequenz
+        window.onload = typeEffect;
     </script>
 </body>
 </html>
